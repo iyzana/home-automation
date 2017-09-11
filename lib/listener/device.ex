@@ -1,9 +1,9 @@
 defmodule HomeAutomation.Device do
-  alias HomeAutomation.Network, as: Network
-  alias HomeAutomation.EventQueue, as: EventQueue
-  alias __MODULE__, as: Device
+  alias HomeAutomation.Network
+  alias HomeAutomation.EventQueue
+  alias __MODULE__
 
-  defstruct [:name, :ip, :mac, :vendor, :online, :last_online]
+  defstruct [:name, :ip, :mac, :vendor, :last_online, online: false]
 
   def start_link do
     {:ok, _} = Agent.start_link(fn -> [] end, name: :device)
@@ -21,12 +21,9 @@ defmodule HomeAutomation.Device do
     hosts = Network.list_hosts()
 
     Agent.update(:device, fn devices -> 
-      device_macs = Enum.map(devices, fn device -> device.mac end)
+      new = create_new_devices(devices, hosts)
 
-      # find out if device is already known by mac
-      {existing, new} = Enum.split_with(hosts, fn host -> host.mac in device_macs end)
-
-      update_devices(devices, existing) ++ create_devices(new)
+      update_devices(devices ++ new, hosts)
     end)
   end
 
@@ -34,26 +31,30 @@ defmodule HomeAutomation.Device do
     host_macs = Enum.map(hosts, fn host -> host.mac end)
 
     Enum.map(devices, fn device -> # update device online status
+      was_online = device.online
       online = device.mac in host_macs
 
       device = %{device |
         online: online,
         last_online: if(online, do: DateTime.utc_now, else: device.last_online)}
 
-      if device.online and not online, do: EventQueue.call([:device, :offline, device])
-      if not device.online and online, do: EventQueue.call([:device, :online, device])
+      if online != was_online do
+        new_state = if online, do: :online, else: :offline
+        EventQueue.call([:device, new_state, device])
+      end
 
       device
     end)
   end
 
-  defp create_devices(hosts) do
-    devices = Enum.map(hosts, &%Device{ip: &1.ipv4, mac: &1.mac, vendor: &1.vendor, online: true, last_online: DateTime.utc_now()})
-    Enum.each(devices, fn device ->
-      EventQueue.call([:device, :new, device])
-      EventQueue.call([:device, :online, device])
-    end)
-    devices
+  defp create_new_devices(devices, hosts) do
+    device_macs = Enum.map(devices, fn device -> device.mac end)
+    
+    hosts
+    |> Enum.filter(fn host -> host.mac not in device_macs end) # find out if device is already known by mac
+    |> Enum.map(&%Device{ip: &1.ipv4, mac: &1.mac, vendor: &1.vendor})
+    |> Stream.each(&EventQueue.call([:device, :new, &1]))
+    |> Enum.to_list()
   end
 
   @doc"""
