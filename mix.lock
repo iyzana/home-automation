@@ -1,1 +1,3 @@
-%{"sweet_xml": {:hex, :sweet_xml, "0.6.5", "dd9cde443212b505d1b5f9758feb2000e66a14d3c449f04c572f3048c66e6697", [], [], "hexpm"}}
+%{"socket": {:hex, :socket, "0.3.12", "4a6543815136503fee67eff0932da1742fad83f84c49130c854114153cc549a6", [], [], "hexpm"},
+  "sweet_xml": {:hex, :sweet_xml, "0.6.5", "dd9cde443212b505d1b5f9758feb2000e66a14d3c449f04c572f3048c66e6697", [], [], "hexpm"},
+  "wakeonlan": {:hex, :wakeonlan, "0.1.0", "4e74fbb30cb309979240ced01e0f9fd217d4f05f6e08a0eb84aa32dfee4a2e93", [], [{:socket, "~> 0.3", [hex: :socket, repo: "hexpm", optional: false]}], "hexpm"}}
