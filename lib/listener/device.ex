@@ -71,4 +71,12 @@ defmodule HomeAutomation.Device do
   def offline_duration(%Device{online: online, last_online: last_online}) do
     if online, do: 0, else: DateTime.diff(DateTime.utc_now(), last_online, :second)
   end
+
+  def set_name(mac, name) do
+    # todo: Alternativly change the device list to a map based on the name
+    Agent.update :device, fn devices ->
+      index = Enum.find_idex(devices, fn device -> device.mac == mac)
+      List.update_at(devices, index, fn device -> %Device{device | name: name})
+    end
+  end
 end
