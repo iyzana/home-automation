@@ -21,7 +21,7 @@ defmodule HomeAutomation.EventQueue do
 
   @spec call(event) :: :ok
   def call(event) do
-    IO.puts "[<] " <> inspect(event)
+    IO.puts "event-queue :: ← " <> inspect(event)
 
     Agent.get(:event_listeners, fn map ->
       map
@@ -29,7 +29,7 @@ defmodule HomeAutomation.EventQueue do
       |> Enum.flat_map(fn {_, callbacks} -> callbacks end)
     end)
     |> Enum.each(fn {name, callback} ->
-      IO.puts "[>] " <> name
+      IO.puts "event-queue :: → " <> name
       callback.(event)
     end)
   end

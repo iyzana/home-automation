@@ -12,7 +12,12 @@ defmodule HomeAutomation.WakePcWhenArriving do
 
         if pc && not pc.online and Device.offline_duration(pc) > 60*60 do
           Network.wake(pc.mac)
+          IO.puts "wake-pc-when-arriving :: ✓ waking pc"
+        else
+          IO.puts "wake-pc-when-arriving :: ✗ pc is already or was recently online"
         end
+      else
+        IO.puts "wake-pc-when-arriving :: ✗ not the phone or insignificant offline time"
       end
     end
   end
