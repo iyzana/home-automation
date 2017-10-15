@@ -31,20 +31,29 @@ defmodule HomeAutomation.Device do
   end
 
   defp update_devices(devices, hosts) do
-    host_macs = Enum.map(hosts, fn host -> host.mac end)
-
     Enum.map(devices, fn device -> # update device online status
+      host = Enum.find(hosts, fn host -> host.mac == device.mac end)
+      old_device = device
+
+      online = host != nil
       was_online = device.online
-      online = device.mac in host_macs
+
+      device = if online do
+        %{device | 
+          ip: host.ipv4,
+          vendor: host.vendor,
+          online: true,
+          last_online: DateTime.utc_now}
+      else
+        %{device | online: false}
+      end
 
       if online != was_online do
         new_state = if online, do: :online, else: :offline
-        EventQueue.call([:device, new_state, device])
+        EventQueue.call([:device, new_state, device, old_device]) # todo: check if complete old device is require
       end
 
-      %{device |
-        online: online,
-        last_online: if(online, do: DateTime.utc_now, else: device.last_online)}
+      device
     end)
   end
 
@@ -71,18 +80,17 @@ defmodule HomeAutomation.Device do
     Agent.get(:device, &Enum.find(&1, fn device -> device.name == name end))
   end
 
-  @spec offline_duration(%Device{online: boolean, last_online: DateTime}) :: non_neg_integer
-  def offline_duration(%Device{online: online, last_online: last_online}) do
+  @spec offline_duration(%Device{online: boolean, last_online: DateTime}, atom) :: non_neg_integer
+  def offline_duration(%Device{online: online, last_online: last_online}, unit \\ :second) do
     cond do
       online -> 0
       last_online == nil -> 0
-      true -> DateTime.diff(DateTime.utc_now(), last_online, :second)
+      true -> DateTime.diff(DateTime.utc_now(), last_online, unit)
     end
   end
 
   @spec set_name(String.t, String.t) :: :ok
   def set_name(mac, name) do
-    # todo: Alternativly change the device list to a map based on the name
     Agent.update :device, fn devices ->
       index = Enum.find_index(devices, fn device -> device.mac == mac end)
       List.update_at(devices, index, fn device -> %Device{device | name: name} end)

@@ -6,12 +6,12 @@ defmodule HomeAutomation.WakePcWhenArriving do
   # todo: create a protocol/behaviour for actions to implement a name, match and run method
   def register do
     # wake the pc when the phone comes online
-    EventQueue.register "wake-pc-when-arriving", [:device, :online], fn [_, _, dev] ->
+    EventQueue.register "wake-pc-when-arriving", [:device, :online], fn [_, _, dev, old_dev] ->
       cond do
         dev.name != "phone" ->
           "✗ not the phone"
-        Device.offline_duration(dev) < 30 * 60 ->
-          "✗ phone recently online (" <> to_minute_string(Device.offline_duration(dev)) <> " min ago)"
+          Device.offline_duration(old_dev, :minute) < 30 ->
+          "✗ phone recently online (" <> Integer.to_string(Device.offline_duration(old_dev, :minute)) <> " min ago)"
         true -> 
           pc = Device.find("pc")
 
@@ -20,17 +20,13 @@ defmodule HomeAutomation.WakePcWhenArriving do
               "✗ pc does not exist"
             pc.online ->
               "✗ pc already online"
-            Device.offline_duration(pc) < 60 * 60 ->
-              "✗ pc recently online (" <> to_minute_string(Device.offline_duration(pc)) <> " min ago)"
+              Device.offline_duration(pc, :minute) < 60 ->
+              "✗ pc recently online (" <> Integer.to_string(Device.offline_duration(pc, :minute)) <> " min ago)"
             true ->
               Network.wake(pc.mac)
               "✓ waking pc"
           end
       end
     end
-  end
-
-  defp to_minute_string(seconds) do
-    Integer.to_string(trunc(seconds / 60) + 1)
   end
 end
