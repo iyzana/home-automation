@@ -73,7 +73,11 @@ defmodule HomeAutomation.Device do
 
   @spec offline_duration(%Device{online: boolean, last_online: DateTime}) :: non_neg_integer
   def offline_duration(%Device{online: online, last_online: last_online}) do
-    if online, do: 0, else: DateTime.diff(DateTime.utc_now(), last_online, :second)
+    cond do
+      online -> 0
+      last_online == nil -> 0
+      true -> DateTime.diff(DateTime.utc_now(), last_online, :second)
+    end
   end
 
   @spec set_name(String.t, String.t) :: :ok

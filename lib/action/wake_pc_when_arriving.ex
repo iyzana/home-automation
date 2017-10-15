@@ -7,18 +7,20 @@ defmodule HomeAutomation.WakePcWhenArriving do
   def register do
     # wake the pc when the phone comes online
     EventQueue.register "wake pc when arriving", [:device, :online], fn [_, _, dev] ->
-      if dev.name == "phone" and Device.offline_duration(dev) > 30*60 do
-        pc = Device.find("pc")
+      cond do
+        dev.name != "phone" -> IO.puts "wake-pc-when-arriving :: ✗ not the phone"
+        Device.offline_duration(dev) < 30 * 60 -> "wake-pc-when-arriving :: ✗ insignificant offline time (" <> Device.offline_duration(dev) / 60 <> "min)"
+        true -> 
+          pc = Device.find("pc")
 
-        if pc && not pc.online and Device.offline_duration(pc) > 60*60 do
-          Network.wake(pc.mac)
-          IO.puts "wake-pc-when-arriving :: ✓ waking pc"
-        else
-          IO.puts "wake-pc-when-arriving :: ✗ pc is already or was recently online"
-        end
-      else
-        IO.puts "wake-pc-when-arriving :: ✗ not the phone or insignificant offline time"
+          cond do
+            !pc -> "wake-pc-when-arriving :: ✗ pc does not exist"
+            pc.online -> "wake-pc-when-arriving :: ✗ pc already online"
+            Device.offline_duration(pc) < 60 * 60 -> "wake-pc-when-arriving :: ✗ pc recently online (" <> Device.offline_duration(pc) <> " min ago)"
+            true ->
+              Network.wake(pc.mac)
+              IO.puts "wake-pc-when-arriving :: ✓ waking pc"
+          end
       end
-    end
   end
 end
