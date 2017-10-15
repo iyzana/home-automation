@@ -10,8 +10,8 @@ defmodule HomeAutomation.Supervisor do
 
     def init(:ok) do
         children = [
-            EventQueue,
-            Device
+            {EventQueue, name: EventQueue},
+            {Device, name: Device}
         ]
 
         Supervisor.init(children, strategy: :one_for_one)

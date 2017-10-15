@@ -6,8 +6,8 @@ defmodule HomeAutomation.Device do
 
   defstruct [:name, :ip, :mac, :vendor, :last_online, online: false]
 
-  def start_link(_opts) do
-    {:ok, pid} = Agent.start_link(fn -> [] end, name: :device)
+  def start_link(opts) do
+    {:ok, pid} = Agent.start_link(fn -> [] end, opts)
 
     spawn_link fn -> schedule_check_online() end
 
@@ -23,7 +23,7 @@ defmodule HomeAutomation.Device do
   defp check_online do
     hosts = Network.list_hosts()
 
-    Agent.update(:device, fn devices -> 
+    Agent.update(Device, fn devices -> 
       new = create_new_devices(devices, hosts)
 
       update_devices(devices ++ new, hosts)
@@ -72,12 +72,12 @@ defmodule HomeAutomation.Device do
   """
   @spec list_devices() :: [%Device{}]
   def list_devices do
-    Agent.get(:device, fn devices -> devices end)
+    Agent.get(Device, fn devices -> devices end)
   end
 
   @spec find(String.t) :: %Device{}
   def find(name) do
-    Agent.get(:device, &Enum.find(&1, fn device -> device.name == name end))
+    Agent.get(Device, &Enum.find(&1, fn device -> device.name == name end))
   end
 
   @spec offline_duration(%Device{online: boolean, last_online: DateTime}) :: non_neg_integer
@@ -91,7 +91,7 @@ defmodule HomeAutomation.Device do
 
   @spec set_name(String.t, String.t) :: :ok
   def set_name(mac, name) do
-    Agent.update :device, fn devices ->
+    Agent.update Device, fn devices ->
       index = Enum.find_index(devices, fn device -> device.mac == mac end)
       List.update_at(devices, index, fn device -> %Device{device | name: name} end)
     end
