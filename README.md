@@ -1,21 +1,16 @@
 # HomeAutomation
 
-**TODO: Add description**
+An elixir project designed for a Raspberry Pi that can automate recurring task at home.  
+... like starting your pc when you get home.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `home_automation` to your list of dependencies in `mix.exs`:
+Install elixir as described [here](https://elixir-lang.org/install.html).  
+Then execute
 
-```elixir
-def deps do
-  [
-    {:home_automation, "~> 0.1.0"}
-  ]
-end
+```bash
+sudo mix depts.get
+sudo iex -S mix
 ```
 
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/home_automation](https://hexdocs.pm/home_automation).
-
