@@ -10,8 +10,8 @@ defmodule HomeAutomation.WakePcWhenArriving do
       cond do
         dev.name != "phone" ->
           "✗ not the phone"
-          Device.offline_duration(old_dev, :minute) < 30 ->
-          "✗ phone recently online (" <> Integer.to_string(Device.offline_duration(old_dev, :minute)) <> " min ago)"
+          Device.offline_duration(old_dev) < 30 ->
+          "✗ phone recently online (" <> Integer.to_string(Device.offline_duration(old_dev)) <> " min ago)"
         true -> 
           pc = Device.find("pc")
 
@@ -20,8 +20,8 @@ defmodule HomeAutomation.WakePcWhenArriving do
               "✗ pc does not exist"
             pc.online ->
               "✗ pc already online"
-              Device.offline_duration(pc, :minute) < 60 ->
-              "✗ pc recently online (" <> Integer.to_string(Device.offline_duration(pc, :minute)) <> " min ago)"
+              Device.offline_duration(pc) < 60 ->
+              "✗ pc recently online (" <> Integer.to_string(Device.offline_duration(pc)) <> " min ago)"
             true ->
               Network.wake(pc.mac)
               "✓ waking pc"

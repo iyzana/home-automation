@@ -80,12 +80,12 @@ defmodule HomeAutomation.Device do
     Agent.get(:device, &Enum.find(&1, fn device -> device.name == name end))
   end
 
-  @spec offline_duration(%Device{online: boolean, last_online: DateTime}, atom) :: non_neg_integer
-  def offline_duration(%Device{online: online, last_online: last_online}, unit \\ :second) do
+  @spec offline_duration(%Device{online: boolean, last_online: DateTime}) :: non_neg_integer
+  def offline_duration(%Device{online: online, last_online: last_online}) do
     cond do
       online -> 0
       last_online == nil -> 0
-      true -> DateTime.diff(DateTime.utc_now(), last_online, unit)
+      true -> div(DateTime.diff(DateTime.utc_now(), last_online, :second), 60)
     end
   end
 
