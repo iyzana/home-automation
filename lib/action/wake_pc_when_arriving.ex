@@ -22,5 +22,6 @@ defmodule HomeAutomation.WakePcWhenArriving do
               IO.puts "wake-pc-when-arriving :: ✓ waking pc"
           end
       end
+    end
   end
 end
