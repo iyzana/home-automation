@@ -1,18 +1,10 @@
 defmodule HomeAutomation do
-  @moduledoc """
-  Documentation for HomeAutomation.
-  """
+  use Application
+  alias HomeAutomation.EventQueue
+  alias HomeAutomation.Device
+  alias HomeAutomation.Actions
 
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> HomeAutomation.hello
-      :world
-
-  """
-  def hello do
-    :world
+  def start(_type, _args) do
+    HomeAutomation.Supervisor.start_link(name: HomeAutomation.Supervisor)
   end
 end

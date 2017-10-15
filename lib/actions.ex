@@ -1,4 +1,5 @@
 defmodule HomeAutomation.Actions do
+  @spec register_all() :: :ok
   def register_all do
     ["WakePcWhenArriving"]
     |> Enum.map(&"Elixir.HomeAutomation." <> &1)
