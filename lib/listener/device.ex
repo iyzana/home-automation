@@ -16,7 +16,7 @@ defmodule HomeAutomation.Device do
 
   defp schedule_check_online do
     check_online()
-    Process.sleep(60000)
+    Process.sleep(30000)
     schedule_check_online()
   end
 
