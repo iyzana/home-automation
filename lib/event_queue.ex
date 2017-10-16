@@ -1,13 +1,13 @@
 defmodule HomeAutomation.EventQueue do
   alias HomeAutomation.Actions
   alias __MODULE__
-  use Agent
+  use GenServer
 
   @type event :: [term, ...]
 
   @spec start_link(GenServer.options) :: Agent.on_start
   def start_link(opts) do
-    result = Agent.start_link(fn -> %{} end, opts)
+    result = GenServer.start_link(__MODULE__, :ok, opts)
 
     Actions.register_all()
 
@@ -16,23 +16,40 @@ defmodule HomeAutomation.EventQueue do
 
   @spec register(String.t, [...], (event -> any)) :: :ok
   def register(name, matcher, callback) do
-    tuple = {name, callback}
+    # tuple = {name, callback}
     # append to callbacks if someone already registered, create a new entry otherwise
-    Agent.update(EventQueue, &Map.update(&1, matcher, [tuple], fn callbacks -> [tuple | callbacks] end))
+    # Agent.update(EventQueue, &Map.update(&1, matcher, [tuple], fn callbacks -> [tuple | callbacks] end))
+    GenServer.call(EventQueue, {:register, name, matcher, callback})
   end
 
   @spec call(event) :: :ok
   def call(event) do
+    GenServer.cast(EventQueue, {:call, event})
+  end
+
+  ## Server Callbacks
+
+  def init(:ok) do
+    {:ok, %{}}
+  end
+
+  def handle_call({:register, name, matcher, callback}, _from, listeners) do
+    tuple = {name, callback}
+    
+    {:reply, :ok, Map.update(listeners, matcher, [tuple], fn callbacks -> [tuple | callbacks] end)}
+  end
+
+  def handle_cast({:call, event}, listeners) do
     IO.puts "event-queue :: ← " <> inspect(event)
 
-    Agent.get(EventQueue, fn map ->
-      map
-      |> Enum.filter(fn {matcher, _} -> Enum.take(event, length(matcher)) == matcher end)
-      |> Enum.flat_map(fn {_, callbacks} -> callbacks end)
-    end)
+    listeners
+    |> Enum.filter(fn {matcher, _} -> Enum.take(event, length(matcher)) == matcher end)
+    |> Enum.flat_map(fn {_, callbacks} -> callbacks end)
     |> Enum.each(fn {name, callback} ->
       response = callback.(event)
       IO.puts "event-queue :: → " <> name <> " :: " <> response
     end)
+
+    {:noreply, listeners}
   end
 end
