@@ -25,7 +25,7 @@ defmodule HomeAutomation.EventQueue do
 
   @spec call(event) :: :ok
   def call(event) do
-    GenServer.cast(EventQueue, {:call, event})
+    GenServer.cast(EventQueue, {:dispatch, event})
   end
 
   ## Server Callbacks
@@ -40,8 +40,8 @@ defmodule HomeAutomation.EventQueue do
     {:reply, :ok, Map.update(listeners, matcher, [tuple], fn callbacks -> [tuple | callbacks] end)}
   end
 
-  def handle_cast({:call, event}, listeners) do
-    Logger.debug("event-queue :: ← " <> inspect(event))
+  def handle_cast({:dispatch, event}, listeners) do
+    Logger.debug("event-queue ← " <> inspect(event))
 
     listeners
     |> Enum.filter(fn {matcher, _} -> Enum.take(event, length(matcher)) == matcher end)

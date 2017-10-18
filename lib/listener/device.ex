@@ -8,11 +8,11 @@ defmodule HomeAutomation.Device do
   defstruct [:name, :ip, :mac, :vendor, :last_online, online: false]
 
   def start_link(opts) do
-    {:ok, pid} = Agent.start_link(fn -> [] end, opts)
+    result = Agent.start_link(fn -> [] end, opts)
 
     spawn_link fn -> schedule_check_online() end
 
-    {:ok, pid}
+    result
   end
 
   defp schedule_check_online do

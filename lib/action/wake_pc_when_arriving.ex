@@ -4,30 +4,32 @@ defmodule HomeAutomation.WakePcWhenArriving do
   alias HomeAutomation.Network
   require Logger
 
+  @name "wake-pc-when-arriving"
+
   # todo: create a protocol/behaviour for actions to implement a name, match and run method
   def register do
     # wake the pc when the phone comes online
-    EventQueue.register "wake-pc-when-arriving", [:device, :online], fn [_, _, dev, old_dev] ->
+    EventQueue.register @name, [:device, :online], fn [_, _, dev, old_dev] ->
+      pc = Device.find("pc")
+
       {status, message} = cond do
-        dev.name != "phone" -> {:error, "not the phone"}
-        Device.offline_duration(old_dev) < 30 -> {:error, "phone recently online (" <> Integer.to_string(Device.offline_duration(old_dev)) <> " min ago)"}
-        true -> 
-          pc = Device.find("pc")
-
-          cond do
-            !pc -> {:error, "pc does not exist"}
-            pc.online -> {:error, "pc already online"}
-            Device.offline_duration(pc) < 60 -> {:error, "pc recently online (" <> Integer.to_string(Device.offline_duration(pc)) <> " min ago)"}
-            true ->
-              Network.wake(pc.mac)
-              {:ok, "waking pc"}
-          end
+        dev.name != "phone" ->
+          {:debug, "not the phone"}
+        Device.offline_duration(old_dev) < 30 ->
+          {:debug, "phone recently online (" <> Integer.to_string(Device.offline_duration(old_dev)) <> " min ago)"}
+        !pc ->
+          {:warn, "pc does not exist"}
+        pc.online ->
+          {:debug, "pc already online"}
+        Device.offline_duration(pc) < 60 ->
+          {:debug, "pc recently online (" <> Integer.to_string(Device.offline_duration(pc)) <> " min ago)"}
+        true ->
+          Network.wake(pc.mac)
+          {:info, "waking pc"}
       end
 
-      case status do
-        :ok -> Logger.info("wake-pc-when-arriving :: ✓ " <> message)
-        :error -> Logger.debug("wake-pc-when-arriving :: ✗ " <> message)
-      end
+      symbol = if status == :info, do: "✓", else: "✗"
+      Logger.log(status, "#{@name} #{symbol} #{message}")
     end
   end
 end
