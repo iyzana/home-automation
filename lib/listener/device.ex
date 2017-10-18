@@ -2,6 +2,7 @@ defmodule HomeAutomation.Device do
   alias HomeAutomation.Network
   alias HomeAutomation.EventQueue
   alias __MODULE__
+  require Logger
   use Agent
 
   defstruct [:name, :ip, :mac, :vendor, :last_online, online: false]
@@ -50,6 +51,7 @@ defmodule HomeAutomation.Device do
 
       if online != was_online do
         new_state = if online, do: :online, else: :offline
+        Logger.info("#{display_name(device)} went #{to_string(new_state)}")
         EventQueue.call([:device, new_state, device, old_device]) # todo: check if complete old device is require
       end
 
@@ -58,13 +60,22 @@ defmodule HomeAutomation.Device do
   end
 
   defp create_new_devices(devices, hosts) do
+    device_names = Application.get_env(:home_automation, :device_names, %{})
     device_macs = Enum.map(devices, fn device -> device.mac end)
     
     hosts
     |> Enum.filter(fn host -> host.mac not in device_macs end) # find out if device is already known by mac
-    |> Enum.map(&%Device{ip: &1.ipv4, mac: &1.mac, vendor: &1.vendor})
+    |> Enum.map(&%Device{ip: &1.ipv4, mac: &1.mac, vendor: &1.vendor, name: Map.get(device_names, &1.mac)})
     |> Stream.each(&EventQueue.call([:device, :new, &1]))
     |> Enum.to_list()
+  end
+
+  defp display_name(%Device{name: name, mac: mac, ip: ip}) do
+    cond do
+      name && name != "" -> name
+      mac && mac != "" -> mac
+      ip && ip != "" -> ip
+    end
   end
 
   @doc"""

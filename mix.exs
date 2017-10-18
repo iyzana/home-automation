@@ -15,7 +15,7 @@ defmodule HomeAutomation.Mixfile do
   def application do
     [
       extra_applications: [:logger],
-      mod: {HomeAutomation, []}
+      mod: {HomeAutomation, []},
     ]
   end
 
@@ -24,6 +24,8 @@ defmodule HomeAutomation.Mixfile do
     [
       {:sweet_xml, "~> 0.6.5"},
       {:wakeonlan, "~> 0.1.0"},
+      {:cowboy, "~> 1.1.2"},
+      {:plug, "~> 1.4.3"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
     ]
   end

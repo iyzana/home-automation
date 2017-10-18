@@ -1,6 +1,7 @@
 defmodule HomeAutomation.EventQueue do
   alias HomeAutomation.Actions
   alias __MODULE__
+  require Logger
   use GenServer
 
   @type event :: [term, ...]
@@ -40,15 +41,12 @@ defmodule HomeAutomation.EventQueue do
   end
 
   def handle_cast({:call, event}, listeners) do
-    IO.puts "event-queue :: ← " <> inspect(event)
+    Logger.debug("event-queue :: ← " <> inspect(event))
 
     listeners
     |> Enum.filter(fn {matcher, _} -> Enum.take(event, length(matcher)) == matcher end)
     |> Enum.flat_map(fn {_, callbacks} -> callbacks end)
-    |> Enum.each(fn {name, callback} ->
-      response = callback.(event)
-      IO.puts "event-queue :: → " <> name <> " :: " <> response
-    end)
+    |> Enum.each(fn {_, callback} -> callback.(event) end)
 
     {:noreply, listeners}
   end

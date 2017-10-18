@@ -1,10 +1,20 @@
 defmodule HomeAutomation do
+  alias HomeAutomation.{EventQueue, Device}
   use Application
-  alias HomeAutomation.EventQueue
-  alias HomeAutomation.Device
-  alias HomeAutomation.Actions
+  require Logger
 
   def start(_type, _args) do
-    HomeAutomation.Supervisor.start_link(name: HomeAutomation.Supervisor)
+    # port = Application.get_env(:home_automation, :cowboy_port, 8080)
+    
+    children = [
+        # Plug.Adapters.Cowboy.child_spec(:http, HomeAutomation.Router, [], port: port),
+        {EventQueue, name: EventQueue},
+        {Device, name: Device},
+    ]
+
+    opts = [strategy: :one_for_one, name: HomeAutomation.Supervisor]
+
+    Logger.info("application started")
+    Supervisor.start_link(children, opts)
   end
 end

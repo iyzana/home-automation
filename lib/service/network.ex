@@ -3,7 +3,8 @@ defmodule HomeAutomation.Network do
 
   @spec list_hosts() :: [%{ipv4: String.t, mac: String.t | nil, vendor: String.t | nil}]
   def list_hosts do
-    {stdout, 0} = System.cmd "nmap", ["-oX", "-", "-sn", "-n", "192.168.1.0/24"]
+    network = Application.get_env(:home_automation, :network)
+    {stdout, 0} = System.cmd "nmap", ["-oX", "-", "-sn", "-n", network]
     xpath(stdout, ~x"/nmaprun/host/status[@state='up']/.."l,
                     ipv4: ~x"address[@addrtype='ipv4']/@addr"s,
                     mac: ~x"address[@addrtype='mac']/@addr"s,
