@@ -5,7 +5,7 @@ defmodule HomeAutomation.Device do
   require Logger
   use Agent
 
-  defstruct [:name, :ip, :mac, :vendor, :last_online, online: false]
+  defstruct [:name, :ip, :mac, :vendor, :last_seen, online: false]
 
   def start_link(opts) do
     result = Agent.start_link(fn -> [] end, opts)
@@ -34,29 +34,36 @@ defmodule HomeAutomation.Device do
   defp update_devices(devices, hosts) do
     Enum.map(devices, fn device -> # update device online status
       host = Enum.find(hosts, fn host -> host.mac == device.mac end)
-      old_device = device
-
       online = host != nil
-      was_online = device.online
 
-      device = if online do
-        %{device | 
-          ip: host.ipv4,
-          vendor: host.vendor,
-          online: true,
-          last_online: DateTime.utc_now}
-      else
-        %{device | online: false}
-      end
+      # debounce going offline by 45 seconds
+      update = online or device.last_seen == nil or DateTime.diff(DateTime.utc_now(), device.last_seen) > 45
 
-      if online != was_online do
-        new_state = if online, do: :online, else: :offline
-        Logger.info("#{display_name(device)} went #{to_string(new_state)}")
-        EventQueue.call([:device, new_state, device, old_device]) # todo: check if complete old device is require
-      end
-
-      device
+      if update, do: update_device(device, online, host), else: device
     end)
+  end
+
+  defp update_device(device, online, host) do
+    was_online = device.online
+    old_device = device
+
+    device = if online do
+      %{device | 
+        ip: host.ipv4,
+        vendor: host.vendor,
+        online: true,
+        last_seen: DateTime.utc_now}
+    else
+      %{device | online: false}
+    end
+
+    if online != was_online do
+      new_state = if online, do: :online, else: :offline
+      Logger.info("#{display_name(device)} went #{to_string(new_state)}")
+      EventQueue.call([:device, new_state, device, old_device]) # todo: check if complete old device is required
+    end
+
+    device
   end
 
   defp create_new_devices(devices, hosts) do
@@ -91,12 +98,12 @@ defmodule HomeAutomation.Device do
     Agent.get(Device, &Enum.find(&1, fn device -> device.name == name end))
   end
 
-  @spec offline_duration(%Device{online: boolean, last_online: DateTime}) :: non_neg_integer
-  def offline_duration(%Device{online: online, last_online: last_online}) do
+  @spec offline_duration(%Device{online: boolean, last_seen: DateTime}) :: non_neg_integer
+  def offline_duration(%Device{online: online, last_seen: last_seen}) do
     cond do
       online -> 0
-      last_online == nil -> 0
-      true -> div(DateTime.diff(DateTime.utc_now(), last_online, :second), 60)
+      last_seen == nil -> 0
+      true -> div(DateTime.diff(DateTime.utc_now(), last_seen, :second), 60)
     end
   end
 
