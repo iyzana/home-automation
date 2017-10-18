@@ -59,7 +59,7 @@ defmodule HomeAutomation.Device do
 
     if online != was_online do
       new_state = if online, do: :online, else: :offline
-      Logger.info("#{display_name(device)} went #{to_string(new_state)}")
+      Logger.info("#{displayname(device)} went #{to_string(new_state)}")
       EventQueue.call([:device, new_state, device, old_device]) # todo: check if complete old device is required
     end
 
@@ -77,12 +77,8 @@ defmodule HomeAutomation.Device do
     |> Enum.to_list()
   end
 
-  defp display_name(%Device{name: name, mac: mac, ip: ip}) do
-    cond do
-      name && name != "" -> name
-      mac && mac != "" -> mac
-      ip && ip != "" -> ip
-    end
+  defp displayname(%Device{name: name, mac: mac, ip: ip}) do
+    Enum.find([name, mac, ip], fn value -> value != nil and value != "" end)
   end
 
   @doc"""
