@@ -2,6 +2,7 @@ defmodule HomeAutomation.WakePcWhenArriving do
   alias HomeAutomation.EventQueue
   alias HomeAutomation.Device
   alias HomeAutomation.Network
+  use Timex
   require Logger
 
   @name "wake-pc-when-arriving"
@@ -23,6 +24,8 @@ defmodule HomeAutomation.WakePcWhenArriving do
           {:debug, "pc already online"}
         Device.offline_duration(pc) < 60 ->
           {:debug, "pc recently online (" <> Integer.to_string(Device.offline_duration(pc)) <> " min ago)"}
+        Timex.local().hour in 0..10 ->
+          {:debug, "night hours"} 
         true ->
           Network.wake(pc.mac)
           {:info, "waking pc"}
