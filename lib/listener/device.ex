@@ -36,8 +36,8 @@ defmodule HomeAutomation.Device do
       host = Enum.find(hosts, fn host -> host.mac == device.mac end)
       online = host != nil
 
-      # debounce going offline by 45 seconds
-      update = online or device.last_seen == nil or DateTime.diff(DateTime.utc_now(), device.last_seen) > 45
+      # debounce going offline
+      update = online or device.last_seen == nil or DateTime.diff(DateTime.utc_now(), device.last_seen) > 75
 
       if update, do: update_device(device, online, host), else: device
     end)
