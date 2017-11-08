@@ -14,7 +14,7 @@ defmodule HomeAutomation.Mixfile do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger],
+      extra_applications: [:logger, :httpotion],
       mod: {HomeAutomation, []},
     ]
   end
@@ -27,6 +27,8 @@ defmodule HomeAutomation.Mixfile do
       {:cowboy, "~> 1.1.2"},
       {:plug, "~> 1.4.3"},
       {:timex, "~> 3.1"},
+      {:httpotion, "~> 3.0.2"},
+      {:poison, "~> 3.1"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
     ]
   end
