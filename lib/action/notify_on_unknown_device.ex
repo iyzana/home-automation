@@ -1,7 +1,6 @@
 defmodule HomeAutomation.NotifyOnUnknownDevice do
   alias HomeAutomation.EventQueue
   alias HomeAutomation.Device
-  alias HomeAutomation.Network
   alias HomeAutomation.IFTTT
   use Timex
   require Logger
