@@ -37,7 +37,8 @@ defmodule HomeAutomation.Device do
       online = host != nil
 
       # debounce going offline
-      update = online or device.last_seen == nil or DateTime.diff(DateTime.utc_now(), device.last_seen) > 75
+      debounce_time = Application.get_env(:home_automation, :offline_debounce)
+      update = online or device.last_seen == nil or DateTime.diff(DateTime.utc_now(), device.last_seen) > debounce_time
 
       if update, do: update_device(device, online, host), else: device
     end)
