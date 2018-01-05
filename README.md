@@ -9,7 +9,7 @@ Install elixir as described [here](https://elixir-lang.org/install.html).
 Then execute
 
 ```bash
-sudo mix depts.get
+sudo mix deps.get
 sudo iex -S mix
 ```
 
