@@ -36,12 +36,16 @@ defmodule HomeAutomation.Device do
       host = Enum.find(hosts, fn host -> host.mac == device.mac end)
       online = host != nil
 
-      # debounce going offline
-      debounce_time = Application.get_env(:home_automation, :offline_debounce)
-      update = online or device.last_seen == nil or DateTime.diff(DateTime.utc_now(), device.last_seen) > debounce_time
+      should_update = online or can_go_offline(device)
 
-      if update, do: update_device(device, online, host), else: device
+      if should_update, do: update_device(device, online, host), else: device
     end)
+  end
+
+  defp can_go_offline(%Device{ip: ip, last_seen: last_seen}) do
+    # debounce going offline
+    debounce_time = Application.get_env(:home_automation, :offline_debounce)
+    (ip == nil or not Network.reachable?(ip)) and (last_seen == nil or DateTime.diff(DateTime.utc_now(), last_seen) > debounce_time)
   end
 
   defp update_device(device, online, host) do
