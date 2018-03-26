@@ -24,10 +24,10 @@ defmodule HomeAutomation.Mixfile do
     [
       {:sweet_xml, "~> 0.6.5"},
       {:wakeonlan, "~> 0.1.0"},
-      {:cowboy, "~> 1.1.2"},
-      {:plug, "~> 1.4.3"},
-      {:timex, "~> 3.1"},
-      {:httpotion, "~> 3.0.2"},
+      {:cowboy, "~> 2.2.2"},
+      {:plug, "~> 1.5.0"},
+      {:timex, "~> 3.2.1"},
+      {:httpotion, "~> 3.1.0"},
       {:poison, "~> 3.1"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
     ]
