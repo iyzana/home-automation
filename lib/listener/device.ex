@@ -10,7 +10,7 @@ defmodule HomeAutomation.Device do
   def start_link(opts) do
     result = Agent.start_link(fn -> [] end, opts)
 
-    spawn_link fn -> schedule_check_online() end
+    spawn_link(fn -> schedule_check_online() end)
 
     result
   end
@@ -24,7 +24,7 @@ defmodule HomeAutomation.Device do
   defp check_online do
     hosts = Network.list_hosts()
 
-    Agent.update(Device, fn devices -> 
+    Agent.update(Device, fn devices ->
       new = create_new_devices(devices, hosts)
 
       update_devices(devices ++ new, hosts)
@@ -32,7 +32,8 @@ defmodule HomeAutomation.Device do
   end
 
   defp update_devices(devices, hosts) do
-    Enum.map(devices, fn device -> # update device online status
+    # update device online status
+    Enum.map(devices, fn device ->
       host = Enum.find(hosts, fn host -> host.mac == device.mac end)
       online = host != nil
 
@@ -45,27 +46,33 @@ defmodule HomeAutomation.Device do
   defp can_go_offline(%Device{ip: ip, last_seen: last_seen}) do
     # debounce going offline
     debounce_time = Application.get_env(:home_automation, :offline_debounce)
-    (ip == nil or not Network.reachable?(ip)) and (last_seen == nil or DateTime.diff(DateTime.utc_now(), last_seen) > debounce_time)
+
+    (ip == nil or not Network.reachable?(ip)) and
+      (last_seen == nil or DateTime.diff(DateTime.utc_now(), last_seen) > debounce_time)
   end
 
   defp update_device(device, online, host) do
     was_online = device.online
     old_device = device
 
-    device = if online do
-      %{device | 
-        ip: host.ipv4,
-        vendor: host.vendor,
-        online: true,
-        last_seen: DateTime.utc_now}
-    else
-      %{device | online: false}
-    end
+    device =
+      if online do
+        %{
+          device
+          | ip: host.ipv4,
+            vendor: host.vendor,
+            online: true,
+            last_seen: DateTime.utc_now()
+        }
+      else
+        %{device | online: false}
+      end
 
     if online != was_online do
       new_state = if online, do: :online, else: :offline
       Logger.info("#{displayname(device)} went #{to_string(new_state)}")
-      EventQueue.call([:device, new_state, device, old_device]) # todo: check if complete old device is required
+      # todo: check if complete old device is required
+      EventQueue.call([:device, new_state, device, old_device])
     end
 
     device
@@ -74,10 +81,13 @@ defmodule HomeAutomation.Device do
   defp create_new_devices(devices, hosts) do
     device_names = Application.get_env(:home_automation, :device_names, %{})
     device_macs = Enum.map(devices, fn device -> device.mac end)
-    
+
     hosts
-    |> Enum.filter(fn host -> host.mac not in device_macs end) # find out if device is already known by mac
-    |> Enum.map(&%Device{ip: &1.ipv4, mac: &1.mac, vendor: &1.vendor, name: Map.get(device_names, &1.mac)})
+    # find out if device is already known by mac
+    |> Enum.filter(fn host -> host.mac not in device_macs end)
+    |> Enum.map(
+      &%Device{ip: &1.ipv4, mac: &1.mac, vendor: &1.vendor, name: Map.get(device_names, &1.mac)}
+    )
     |> Stream.each(&EventQueue.call([:device, :new, &1]))
     |> Enum.to_list()
   end
@@ -86,7 +96,7 @@ defmodule HomeAutomation.Device do
     Enum.find([name, mac, ip], fn value -> value != nil and value != "" end)
   end
 
-  @doc"""
+  @doc """
   return all known devices
   """
   @spec list_devices() :: [%Device{}]
@@ -94,7 +104,7 @@ defmodule HomeAutomation.Device do
     Agent.get(Device, fn devices -> devices end)
   end
 
-  @spec find(String.t) :: %Device{}
+  @spec find(String.t()) :: %Device{}
   def find(name) do
     Agent.get(Device, &Enum.find(&1, fn device -> device.name == name end))
   end
@@ -108,11 +118,11 @@ defmodule HomeAutomation.Device do
     end
   end
 
-  @spec set_name(String.t, String.t) :: :ok
+  @spec set_name(String.t(), String.t()) :: :ok
   def set_name(mac, name) do
-    Agent.update Device, fn devices ->
+    Agent.update(Device, fn devices ->
       index = Enum.find_index(devices, fn device -> device.mac == mac end)
       List.update_at(devices, index, fn device -> %Device{device | name: name} end)
-    end
+    end)
   end
 end

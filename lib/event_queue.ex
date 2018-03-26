@@ -6,7 +6,7 @@ defmodule HomeAutomation.EventQueue do
 
   @type event :: [term, ...]
 
-  @spec start_link(GenServer.options) :: Agent.on_start
+  @spec start_link(GenServer.options()) :: Agent.on_start()
   def start_link(opts) do
     result = GenServer.start_link(__MODULE__, :ok, opts)
 
@@ -15,7 +15,7 @@ defmodule HomeAutomation.EventQueue do
     result
   end
 
-  @spec register(String.t, [...], (event -> any)) :: :ok
+  @spec register(String.t(), [...], (event -> any)) :: :ok
   def register(name, matcher, callback) do
     # tuple = {name, callback}
     # append to callbacks if someone already registered, create a new entry otherwise
@@ -36,8 +36,9 @@ defmodule HomeAutomation.EventQueue do
 
   def handle_call({:register, name, matcher, callback}, _from, listeners) do
     tuple = {name, callback}
-    
-    {:reply, :ok, Map.update(listeners, matcher, [tuple], fn callbacks -> [tuple | callbacks] end)}
+
+    {:reply, :ok,
+     Map.update(listeners, matcher, [tuple], fn callbacks -> [tuple | callbacks] end)}
   end
 
   def handle_cast({:dispatch, event}, listeners) do
