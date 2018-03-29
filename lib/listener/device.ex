@@ -22,7 +22,8 @@ defmodule HomeAutomation.Device do
   end
 
   defp check_online do
-    hosts = Network.list_hosts()
+    hosts =
+      Network.list_hosts()
       |> Enum.filter(fn host -> host.mac != nil and host.mac != "" end)
 
     Agent.update(Device, fn devices ->
@@ -48,8 +49,8 @@ defmodule HomeAutomation.Device do
     # debounce going offline
     debounce_time = Application.get_env(:home_automation, :offline_debounce)
 
-    (ip == nil or not Network.reachable?(ip)) and
-      (last_seen == nil or DateTime.diff(DateTime.utc_now(), last_seen) > debounce_time)
+    (last_seen == nil or DateTime.diff(DateTime.utc_now(), last_seen) > debounce_time) and
+      (ip == nil or not Network.reachable?(ip))
   end
 
   defp update_device(device, online, host) do
