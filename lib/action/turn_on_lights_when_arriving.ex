@@ -16,6 +16,7 @@ defmodule HomeAutomation.TurnOnLightsWhenArriving do
           true ->
             Lifx.Client.devices()
             |> Enum.filter(fn light -> light.label == "light" end)
+            |> Enum.map(& &1.id)
             |> Enum.each(&Lifx.Device.on/1)
 
             {:info, "turning on light"}
