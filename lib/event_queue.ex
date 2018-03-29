@@ -10,6 +10,8 @@ defmodule HomeAutomation.EventQueue do
   def start_link(opts) do
     result = GenServer.start_link(__MODULE__, :ok, opts)
 
+    Lifx.Client.start_link()
+    Lifx.Client.start()
     Actions.register_all()
 
     result
@@ -17,10 +19,7 @@ defmodule HomeAutomation.EventQueue do
 
   @spec register(String.t(), [...], (event -> any)) :: :ok
   def register(name, matcher, callback) do
-    # tuple = {name, callback}
-    # append to callbacks if someone already registered, create a new entry otherwise
-    # Agent.update(EventQueue, &Map.update(&1, matcher, [tuple], fn callbacks -> [tuple | callbacks] end))
-    GenServer.call(EventQueue, {:register, name, matcher, callback})
+    GenServer.cast(EventQueue, {:register, name, matcher, callback})
   end
 
   @spec call(event) :: :ok
@@ -34,21 +33,20 @@ defmodule HomeAutomation.EventQueue do
     {:ok, %{}}
   end
 
-  def handle_call({:register, name, matcher, callback}, _from, listeners) do
+  def handle_cast({:register, name, matcher, callback}, state) do
     tuple = {name, callback}
 
-    {:reply, :ok,
-     Map.update(listeners, matcher, [tuple], fn callbacks -> [tuple | callbacks] end)}
+    {:noreply, Map.update(state, matcher, [tuple], fn callbacks -> [tuple | callbacks] end)}
   end
 
-  def handle_cast({:dispatch, event}, listeners) do
+  def handle_cast({:dispatch, event}, state) do
     Logger.debug("event-queue ← " <> inspect(event))
 
-    listeners
+    state
     |> Enum.filter(fn {matcher, _} -> Enum.take(event, length(matcher)) == matcher end)
     |> Enum.flat_map(fn {_, callbacks} -> callbacks end)
     |> Enum.each(fn {_, callback} -> callback.(event) end)
 
-    {:noreply, listeners}
+    {:noreply, state}
   end
 end

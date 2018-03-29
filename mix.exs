@@ -29,7 +29,7 @@ defmodule HomeAutomation.Mixfile do
       {:timex, "~> 3.2.1"},
       {:httpotion, "~> 3.1.0"},
       {:poison, "~> 3.1"},
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
+      {:lifx, github: "succcubbus/lifx", branch: "devel"},
     ]
   end
 end
