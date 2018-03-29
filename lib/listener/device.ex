@@ -23,6 +23,7 @@ defmodule HomeAutomation.Device do
 
   defp check_online do
     hosts = Network.list_hosts()
+      |> Enum.filter(fn host -> host.mac != nil and host.mac != "" end)
 
     Agent.update(Device, fn devices ->
       new = create_new_devices(devices, hosts)

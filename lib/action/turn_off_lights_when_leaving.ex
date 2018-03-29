@@ -1,4 +1,4 @@
-defmodule HomeAutomation.TUrnOffLightsWhenLeaving do
+defmodule HomeAutomation.TurnOffLightsWhenLeaving do
   alias HomeAutomation.EventQueue
   require Logger
 
