@@ -29,7 +29,7 @@ defmodule HomeAutomation.Mixfile do
       {:timex, "~> 3.2.1"},
       {:httpotion, "~> 3.1.0"},
       {:poison, "~> 3.1"},
-      {:lifx, github: "succcubbus/lifx", branch: "devel"},
+      {:lifx, "~> 0.1.8"},
     ]
   end
 end
