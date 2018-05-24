@@ -29,7 +29,7 @@ defmodule HomeAutomation.Mixfile do
       {:timex, "~> 3.2.1"},
       {:httpotion, "~> 3.1.0"},
       {:poison, "~> 3.1"},
-      {:lifx, "~> 0.1.8"},
+      {:lifx, github: "rosetta-home/lifx", ref: "083a2951556560dca96b629a1d0a8bd826a49bf2"},
     ]
   end
 end
