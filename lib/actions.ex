@@ -5,7 +5,8 @@ defmodule HomeAutomation.Actions do
       "WakePcWhenArriving",
       "NotifyOnUnknownDevice",
       "TurnOffLightsWhenLeaving",
-      "TurnOnLightsWhenArriving"
+      "TurnOnLightsWhenArriving",
+      "DimLightsWhenTimeToSleep"
     ]
     |> Enum.map(&("Elixir.HomeAutomation." <> &1))
     |> Enum.map(&String.to_atom/1)
