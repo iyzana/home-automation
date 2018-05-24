@@ -9,7 +9,8 @@ defmodule HomeAutomation.DimLightsWhenTimeToSleep do
   def register do
     # wake the pc when the phone comes online
     EventQueue.register(@name, [:webhook, :time_to_bed_alarm_alert], fn _ ->
-      color_values = Application.get_env(:home_automation, :before_sleep_color)
+      color_values = Application.get_env(:home_automation, :before_sleep_dim_color)
+      dim_duration = Application.get_env(:home_automation, :before_sleep_dim_duration, 30 * 60 * 1000)
 
       {level, message} =
         cond do
@@ -27,7 +28,7 @@ defmodule HomeAutomation.DimLightsWhenTimeToSleep do
             Lifx.Client.devices()
             |> Enum.filter(fn light -> light.label == "light" end)
             |> Enum.map(& &1.id)
-            |> Enum.each(&Lifx.Device.set_color(&1, color, 60000))
+            |> Enum.each(&Lifx.Device.set_color(&1, color, dim_duration))
 
             {:info, "dimming lights"}
         end

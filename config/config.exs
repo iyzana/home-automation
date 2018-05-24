@@ -5,7 +5,8 @@ use Mix.Config
 config :home_automation, cowboy_port: 8080
 config :home_automation, network: "192.168.1.0/24"
 config :home_automation, offline_debounce: 105
-config :home_automation, before_sleep_color: %{hue: 0, saturation: 0, brightness: 20, kelvin: 2500}
+config :home_automation, before_sleep_dim_color: %{hue: 0, saturation: 0, brightness: 20, kelvin: 2500}
+config :home_automation, before_sleep_dim_duration: 30 * 60 * 1000
 
 config :logger, level: :info
 config :logger, :console, format: "$time $metadata[$level] $levelpad$message\n"
