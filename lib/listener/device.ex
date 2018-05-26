@@ -81,14 +81,19 @@ defmodule HomeAutomation.Device do
   end
 
   defp create_new_devices(devices, hosts) do
-    device_names = Application.get_env(:home_automation, :device_names, %{})
+    known_devices = Application.get_env(:home_automation, :known_devices, %{})
     device_macs = Enum.map(devices, fn device -> device.mac end)
 
     hosts
     # find out if device is already known by mac
     |> Enum.filter(fn host -> host.mac not in device_macs end)
     |> Enum.map(
-      &%Device{ip: &1.ipv4, mac: &1.mac, vendor: &1.vendor, name: Map.get(device_names, &1.mac)}
+      &%Device{
+        ip: &1.ipv4,
+        mac: &1.mac,
+        vendor: &1.vendor,
+        name: get_in(known_devices, [&1.mac, :name])
+      }
     )
     |> Stream.each(&EventQueue.call([:device, :new, &1]))
     |> Enum.to_list()
