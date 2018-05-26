@@ -106,7 +106,7 @@ defmodule HomeAutomation.Device do
     Agent.get(Device, fn devices -> devices end)
   end
 
-  @spec find(String.t()) :: %Device{}
+  @spec find(String.t()) :: %Device{} | nil
   def find(name) do
     Agent.get(Device, &Enum.find(&1, fn device -> device.name == name end))
   end

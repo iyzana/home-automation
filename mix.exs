@@ -6,7 +6,7 @@ defmodule HomeAutomation.Mixfile do
       app: :home_automation,
       version: "0.1.0",
       elixir: "~> 1.5",
-      start_permanent: Mix.env == :prod,
+      start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
   end
@@ -15,7 +15,7 @@ defmodule HomeAutomation.Mixfile do
   def application do
     [
       extra_applications: [:logger, :httpotion],
-      mod: {HomeAutomation, []},
+      mod: {HomeAutomation, []}
     ]
   end
 
@@ -30,7 +30,7 @@ defmodule HomeAutomation.Mixfile do
       {:quantum, "~> 2.2"},
       {:httpotion, "~> 3.1"},
       {:poison, "~> 3.1"},
-      {:lifx, github: "rosetta-home/lifx", ref: "083a2951556560dca96b629a1d0a8bd826a49bf2"},
+      {:lifx, github: "rosetta-home/lifx", ref: "083a2951556560dca96b629a1d0a8bd826a49bf2"}
     ]
   end
 end

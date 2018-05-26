@@ -17,7 +17,7 @@ defmodule HomeAutomation.Network do
     )
   end
 
-  @spec reachable?(String.t()) :: Boolean
+  @spec reachable?(String.t()) :: boolean()
   def reachable?(ip) do
     {stdout, 0} = System.cmd("nmap", ["-oX", "-", "-sP", "-n", ip])
     length(xpath(stdout, ~x"/nmaprun/host/status[@state='up']"l)) != 0

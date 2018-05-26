@@ -31,9 +31,6 @@ defmodule HomeAutomation.NotifyOnUnknownDevice do
             :failed ->
               {:warn,
                "ifttt returned #{result.status_code} #{inspect(Poison.decode!(result.body))}"}
-
-            true ->
-              {:error, "unknown status " <> inspect(status)}
           end
         end
 
