@@ -12,10 +12,18 @@ defmodule HomeAutomation.UndimLightsAfterWaking do
       color_values = Application.get_env(:home_automation, :after_sleep_undim_color)
       dim_duration = Application.get_env(:home_automation, :after_sleep_undim_duration, 10 * 1000)
 
+      lights =
+        Lifx.Client.devices()
+        |> Enum.filter(fn light -> light.label == "light" end)
+        |> Enum.map(& &1.id)
+
       {level, message} =
         cond do
           color_values == nil ->
             {:warn, "no after_sleep_color specified"}
+
+          Enum.empty?(lights) ->
+            {:warn, "no lights found"}
 
           true ->
             color = %Lifx.Protocol.HSBK{
@@ -25,10 +33,7 @@ defmodule HomeAutomation.UndimLightsAfterWaking do
               kelvin: color_values.kelvin
             }
 
-            Lifx.Client.devices()
-            |> Enum.filter(fn light -> light.label == "light" end)
-            |> Enum.map(& &1.id)
-            |> Enum.each(&Lifx.Device.set_color(&1, color, dim_duration))
+            Enum.each(lights, &Lifx.Device.set_color(&1, color, dim_duration))
 
             {:info, "undimming lights"}
         end

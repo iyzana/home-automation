@@ -14,10 +14,18 @@ defmodule HomeAutomation.DimLightsWhenTimeToSleep do
       dim_duration =
         Application.get_env(:home_automation, :before_sleep_dim_duration, 30 * 60 * 1000)
 
+      lights =
+        Lifx.Client.devices()
+        |> Enum.filter(fn light -> light.label == "light" end)
+        |> Enum.map(& &1.id)
+
       {level, message} =
         cond do
           color_values == nil ->
             {:warn, "no before_sleep_color specified"}
+
+          Enum.empty?(lights) ->
+            {:warn, "no lights found"}
 
           true ->
             color = %Lifx.Protocol.HSBK{
@@ -27,10 +35,7 @@ defmodule HomeAutomation.DimLightsWhenTimeToSleep do
               kelvin: color_values.kelvin
             }
 
-            Lifx.Client.devices()
-            |> Enum.filter(fn light -> light.label == "light" end)
-            |> Enum.map(& &1.id)
-            |> Enum.each(&Lifx.Device.set_color(&1, color, dim_duration))
+            Enum.each(lights, &Lifx.Device.set_color(&1, color, dim_duration))
 
             {:info, "dimming lights"}
         end
