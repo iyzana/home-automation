@@ -10,7 +10,7 @@ defmodule HomeAutomation.WebhookValidation do
   def init(options), do: options
 
   def call(%Plug.Conn{request_path: path} = conn, opts) do
-    if path in opts[:paths], do: verify_request!(conn.body_params)
+    if path not in opts[:except], do: verify_request!(conn.body_params)
     conn
   end
 

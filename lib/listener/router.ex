@@ -9,7 +9,7 @@ defmodule HomeAutomation.Router do
 
   plug(
     WebhookValidation,
-    paths: ["/time_to_bed_alarm_alert", "/alarm_alert_dismiss"]
+    except: []
   )
 
   plug(:match)
@@ -22,6 +22,11 @@ defmodule HomeAutomation.Router do
 
   post "/alarm_alert_dismiss" do
     EventQueue.call([:webhook, :alarm_alert_dismiss])
+    send_resp(conn, 200, "Success")
+  end
+
+  post "/toggle_light" do
+    EventQueue.call([:webhook, :toggle_light])
     send_resp(conn, 200, "Success")
   end
 
