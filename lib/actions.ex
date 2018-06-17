@@ -7,6 +7,7 @@ defmodule HomeAutomation.Actions do
       "TurnOffLightsWhenLeaving",
       "TurnOnLightsWhenArriving",
       "DimLightsWhenTimeToSleep",
+      "TurnOffLightsWhenSleeping",
       "UndimLightsAfterWaking",
       "ToggleLightOnRequest"
     ]
