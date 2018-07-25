@@ -10,7 +10,13 @@ defmodule HomeAutomation.Person do
   end
 
   def find(name) do
-    Agent.get(__MODULE__, fn persons -> persons.find(&(&1.name == name)) end)
+    Agent.get(__MODULE__, fn persons ->
+        Enum.find(
+          persons,
+          %__MODULE__{name: name, location: "unknown", last_home: nil, asleep: false},
+          &(&1.name == name)
+        )
+    end)
   end
 
   def set_home(name) do
@@ -18,12 +24,12 @@ defmodule HomeAutomation.Person do
     EventQueue.call([:person, :home, person])
 
     Agent.update(__MODULE__, fn persons ->
-      index = Enum.find_index(persons, fn p -> p.name == person.name end)
+      persons = if person not in persons, do: [person | persons], else: persons
 
       List.update_at(
         persons,
-        index,
-        fn p -> %__MODULE__{p | location: "home", last_home: DateTime.utc_now()} end
+        Enum.find_index(persons, &(&1.name == name)),
+        fn p -> %__MODULE__{p | location: "home", last_home: DateTime.utc_now()}   end
       )
     end)
   end
@@ -33,12 +39,12 @@ defmodule HomeAutomation.Person do
     EventQueue.call([:person, :left, person])
 
     Agent.update(__MODULE__, fn persons ->
-      index = Enum.find_index(persons, fn p -> p.name == person.name end)
+      persons = if person not in persons, do: [person | persons], else: persons
 
       List.update_at(
         persons,
-        index,
-        fn p -> %__MODULE__{p | location: "gone"} end
+        Enum.find_index(persons, &(&1.name == name)),
+        fn p -> %__MODULE__{p | location: "gone"}  end
       )
     end)
   end
@@ -49,11 +55,11 @@ defmodule HomeAutomation.Person do
     EventQueue.call([:person, state, person])
 
     Agent.update(__MODULE__, fn persons ->
-      index = Enum.find_index(persons, fn p -> p.name == person.name end)
+      persons = if person not in persons, do: [person | persons], else: persons
 
       List.update_at(
         persons,
-        index,
+        Enum.find_index(persons, &(&1.name == name)),
         fn p -> %__MODULE__{p | asleep: asleep} end
       )
     end)
