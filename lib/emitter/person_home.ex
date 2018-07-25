@@ -114,7 +114,7 @@ defmodule HomeAutomation.Person do
 
     EventQueue.register(
       inspect(__MODULE__),
-      [:webhook, :sleep_tracking_stopper],
+      [:webhook, :sleep_tracking_stopped],
       fn _ ->
         set_asleep("jannis", false)
       end
