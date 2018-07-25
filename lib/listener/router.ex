@@ -30,8 +30,23 @@ defmodule HomeAutomation.Router do
     send_resp(conn, 200, "Success")
   end
 
+  post "/sleep_tracking_stopped" do
+    EventQueue.call([:webhook, :sleep_tracking_stopped])
+    send_resp(conn, 200, "Success")
+  end
+
   post "/toggle_light" do
     EventQueue.call([:webhook, :toggle_light])
+    send_resp(conn, 200, "Success")
+  end
+
+  post "/person_home/:name" do
+    EventQueue.call([:webhook, :person, :home, name])
+    send_resp(conn, 200, "Success")
+  end
+
+  post "/person_left/:name" do
+    EventQueue.call([:webhook, :person, :left, name])
     send_resp(conn, 200, "Success")
   end
 

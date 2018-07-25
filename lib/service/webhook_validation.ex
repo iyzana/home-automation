@@ -9,13 +9,15 @@ defmodule HomeAutomation.WebhookValidation do
 
   def init(options), do: options
 
-  def call(%Plug.Conn{request_path: path} = conn, opts) do
-    if path not in opts[:except], do: verify_request!(conn.body_params)
+  def call(%Plug.Conn{request_path: path, params: params} = conn, opts) do
+    if path not in opts[:except] do
+      verify_request!(params)
+    end
     conn
   end
 
-  defp verify_request!(body_params) do
-    api_key = body_params["api_key"]
+  defp verify_request!(params) do
+    api_key = params["api_key"]
     webhook_api_key = Application.get_env(:home_automation, :webhook_api_key, nil)
 
     unless api_key == webhook_api_key, do: raise(InvalidApiKeyError)

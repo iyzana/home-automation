@@ -1,7 +1,5 @@
 defmodule HomeAutomation.WakePcWhenArriving do
-  alias HomeAutomation.EventQueue
-  alias HomeAutomation.Device
-  alias HomeAutomation.Network
+  alias HomeAutomation.{EventQueue, Device, Network, Person}
   use Timex
   require Logger
 
@@ -10,18 +8,18 @@ defmodule HomeAutomation.WakePcWhenArriving do
   # todo: create a protocol/behaviour for actions to implement a name, match and run method
   def register do
     # wake the pc when the phone comes online
-    EventQueue.register(@name, [:device, :online], fn [_, _, dev, old_dev] ->
+    EventQueue.register(@name, [:person, :home], fn [_, _, %Person{name: name} = person] ->
       pc = Device.find("pc")
 
       {status, message} =
         cond do
-          dev.name != "phone" ->
-            {:debug, "not the phone"}
+          name != "jannis" ->
+            {:debug, "not jannis"}
 
-          Device.offline_duration(old_dev) < 30 ->
+          Person.away_duration(person) < 30 ->
             {:debug,
-             "phone recently online (" <>
-               Integer.to_string(Device.offline_duration(old_dev)) <> " min ago)"}
+             "jannis recently home (" <>
+               Integer.to_string(Person.away_duration(person)) <> " min ago)"}
 
           !pc ->
             {:warn, "pc does not exist"}

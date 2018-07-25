@@ -1,5 +1,5 @@
 defmodule HomeAutomation do
-  alias HomeAutomation.{EventQueue, Device}
+  alias HomeAutomation.{EventQueue, Device, Person}
   use Application
   require Logger
 
@@ -13,7 +13,8 @@ defmodule HomeAutomation do
         options: [port: port]
       ),
       {EventQueue, name: EventQueue},
-      {Device, name: Device}
+      {Device, name: Device},
+      {Person, name: Person},
     ]
 
     opts = [strategy: :one_for_one, name: HomeAutomation.Supervisor]

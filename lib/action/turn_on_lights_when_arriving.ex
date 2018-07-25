@@ -1,34 +1,27 @@
 defmodule HomeAutomation.TurnOnLightsWhenArriving do
-  alias HomeAutomation.EventQueue
+  alias HomeAutomation.{EventQueue, Person}
   require Logger
 
   @name "turn-on-lights-when-arriving"
 
   # todo: create a protocol/behaviour for actions to implement a name, match and run method
   def register do
-    # wake the pc when the phone comes online
-    EventQueue.register(@name, [:device, :online], fn [_, _, dev, _] ->
-      lights =
-        Lifx.Client.devices()
-        |> Enum.filter(fn light -> light.label == "light" end)
-        |> Enum.map(& &1.id)
+    EventQueue.register(@name, [:person, :home], fn [_, _, %Person{name: name, asleep: asleep}] ->
+      cond do
+        name != "jannis" ->
+          Logger.info("not jannis")
 
-      {status, message} =
-        cond do
-          dev.name != "phone" ->
-            {:debug, "not the phone"}
+        asleep ->
+          Logger.info("jannis is asleep")
 
-          Enum.empty?(lights) ->
-            {:warn, "no lights found"}
+        true ->
+          Lifx.Client.devices()
+          |> Enum.filter(fn light -> light.label == "light" end)
+          |> Enum.map(& &1.id)
+          |> Enum.each(&Lifx.Device.on/1)
 
-          true ->
-            Enum.each(lights, &Lifx.Device.on/1)
-
-            {:info, "turning on lights"}
-        end
-
-      symbol = if status == :info, do: "✓", else: "✗"
-      Logger.log(status, "#{@name} #{symbol} #{message}")
+          Logger.info("turning on lights")
+      end
     end)
   end
 end
