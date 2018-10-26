@@ -101,6 +101,7 @@ defmodule HomeAutomation.Person do
       [:webhook, :person, :left],
       fn [:webhook, :person, :left, name] ->
         set_left(name)
+        set_asleep("jannis", false) # not asleep anymore, when leaving
       end
     )
 
