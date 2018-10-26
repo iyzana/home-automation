@@ -7,7 +7,7 @@ defmodule HomeAutomation do
     port = Application.get_env(:home_automation, :cowboy_port, 8080)
 
     children = [
-      Plug.Adapters.Cowboy2.child_spec(
+      Plug.Cowboy.child_spec(
         scheme: :http,
         plug: HomeAutomation.Router,
         options: [port: port]
