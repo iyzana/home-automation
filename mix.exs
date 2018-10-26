@@ -25,9 +25,9 @@ defmodule HomeAutomation.Mixfile do
       {:sweet_xml, "~> 0.6.5"},
       {:wakeonlan, "~> 0.1.0"},
       {:cowboy, "~> 2.4"},
-      {:plug, "~> 1.5"},
+      {:plug, "~> 1.6"},
       {:timex, "~> 3.3"},
-      {:quantum, "~> 2.2"},
+      {:quantum, "~> 2.3"},
       {:httpotion, "~> 3.1"},
       {:poison, "~> 3.1"},
       {:lifx, github: "rosetta-home/lifx", ref: "083a2951556560dca96b629a1d0a8bd826a49bf2"}
