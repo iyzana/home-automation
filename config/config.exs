@@ -21,6 +21,8 @@ config :home_automation,
 
 config :home_automation, after_sleep_undim_duration: 10 * 1000
 
+config :home_automation, light_label: "light-couch"
+
 config :logger, level: :info
 config :logger, :console, format: "$time $metadata[$level] $levelpad$message\n"
 

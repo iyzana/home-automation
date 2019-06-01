@@ -15,8 +15,10 @@ defmodule HomeAutomation.ToggleLightOnRequest do
   end
 
   defp get_data do
+    light_label = Application.get_env(:home_automation, :light_label)
+
     Lifx.Client.devices()
-    |> Enum.filter(fn light -> light.label == "light" end)
+    |> Enum.filter(fn light -> light.label == light_label end)
   end
 
   defp run([]), do: {:warn, "no lights found"}

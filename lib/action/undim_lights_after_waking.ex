@@ -11,10 +11,11 @@ defmodule HomeAutomation.UndimLightsAfterWaking do
     EventQueue.register(@name, [:webhook, :alarm_alert_dismiss], fn _ ->
       color_values = Application.get_env(:home_automation, :after_sleep_undim_color)
       dim_duration = Application.get_env(:home_automation, :after_sleep_undim_duration, 10 * 1000)
+      light_label = Application.get_env(:home_automation, :light_label)
 
       lights =
         Lifx.Client.devices()
-        |> Enum.filter(fn light -> light.label == "light" end)
+        |> Enum.filter(fn light -> light.label == light_label end)
         |> Enum.map(& &1.id)
 
       {level, message} =

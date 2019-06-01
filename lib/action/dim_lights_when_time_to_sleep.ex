@@ -16,6 +16,8 @@ defmodule HomeAutomation.DimLightsWhenTimeToSleep do
   end
 
   defp get_data do
+    light_label = Application.get_env(:home_automation, :light_label)
+
     color =
       Application.get_env(:home_automation, :before_sleep_dim_color)
       |> map_to_color()
@@ -25,7 +27,7 @@ defmodule HomeAutomation.DimLightsWhenTimeToSleep do
 
     lights =
       Lifx.Client.devices()
-      |> Enum.filter(fn light -> light.label == "light" end)
+      |> Enum.filter(fn light -> light.label == light_label end)
       |> Enum.map(& &1.id)
 
     {color, dim_duration, lights}
